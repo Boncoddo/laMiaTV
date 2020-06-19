@@ -1,0 +1,271 @@
+@import 
+url(https://fonts.googleapis.com/css?family=Righteous);
+
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+* {
+    -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+}
+
+body {
+    -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
+    -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
+    -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
+    background-color: #000;
+	background: url(../img/sfondo.gif);
+	background-repeat: repeat;
+	background-size: auto;
+    font-family: 'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    color: #FFF;
+    height: 100%;
+	width: auto;
+	margin-top: 2%;
+    padding-left: 200px;
+    padding-right: 200px;
+}
+
+.sezione {
+	font-family: sans-serif;
+	font-size: xx-large;
+	font-weight: bold;
+	color: #FFF;
+	line-height: 82px;
+	
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	
+	border: 1px solid #ccc;
+	border-color: rgba(255,255,255,.3);
+	border-width: 0;
+	border-top-width: 1px;
+	padding-top: 1px;
+	padding-left: 1.5em;
+	
+	background-color: #252525;
+}
+
+.canale {
+	font-family: sans-serif;
+	font-size: xx-large;
+	font-weight: bold;
+	color: #222;
+	line-height: 82px;
+	
+	display: none;
+	
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	
+	border: 1px solid #ccc;
+	border-color: rgba(255,255,255,.3);
+	border-width: 0;
+	border-top-width: 1px;
+	padding-top: 1px;
+	padding-left: 1.5em;
+	
+	background: #eee;
+	background-image: -webkit-gradient(linear, left top, left bottom, from( #ffffff), to( #f1f1f1)); /* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient( #ffffff, #f1f1f1); /* Chrome 10+, Saf5.1+ */
+	background-image:    -moz-linear-gradient( #ffffff, #f1f1f1); /* FF3.6 */
+	background-image:     -ms-linear-gradient( #ffffff, #f1f1f1); /* IE10 */
+	background-image:      -o-linear-gradient( #ffffff, #f1f1f1); /* Opera 11.10+ */
+	background-image:         linear-gradient( #ffffff, #f1f1f1);
+	
+}
+
+.icona {
+	background: #666;
+	background: rgba(0,0,0,.4);
+	background-position: -108px 50%;
+	background-image: url(../img/icone.png);
+	background-repeat: no-repeat;
+	
+	-moz-border-radius: 9px;
+	-webkit-border-radius: 9px;
+	border-radius: 9px;
+	
+	width: 18px;
+	height: 18px;
+	
+	position: absolute;
+	margin-left: -0.90em;
+	
+	margin-top: 33px;
+}
+
+.ancorato {
+	position: fixed;
+	top: 4%;
+	right: 204px;
+}
+
+#barra {
+	height: 33px;
+	width: auto;
+	font-family: 'Righteous', cursive;
+	font-size: 1.7em;
+	text-indent: 15px;
+	color: #222;
+	background: #F1F1F1;
+	margin-right: -5px;
+}
+
+#pulsanteCerca {
+	 outline: none;
+	 cursor: pointer;
+	 text-align: center;
+	 text-decoration: none;
+	 color: #222;
+	 padding: 5px 15px 5px 15px;
+	 border: solid 1px #00;
+	 background: #F1F1F1;
+	 font-family: 'Righteous', cursive;
+	 font-size: 2.7em;
+	 
+	 -moz-border-radius: 9px;
+	 -webkit-border-radius: 9px;
+	 border-radius: 9px;
+}
+
+#pulsanteChiudi {
+	 outline: none;
+	 cursor: pointer;
+	 text-align: center;
+	 text-decoration: none;
+	 color: #222;
+	 padding: 5px 15px 5px 15px;
+	 border: solid 1px #00;
+	 background: #F1F1F1;
+	 font-family: 'Righteous', cursive;
+	 font-size: 2.7em;
+	 
+	 -moz-border-radius: 9px;
+	 -webkit-border-radius: 9px;
+	 border-radius: 9px;
+	 
+	 display: none;
+}
+
+#pulsanteTop {
+	 position: fixed;
+	 visibility: hidden;
+	 opacity: 0;
+	 bottom: 40px;
+	 right: 69px;
+	 
+	 outline: none;
+	 cursor: pointer;
+	 text-align: center;
+	 text-decoration: none;
+	 color: #222;
+	 padding: 5px 15px 5px 15px;
+	 border: solid 1px #00;
+	 background: #F1F1F1;
+	 font-family: 'Righteous', cursive;
+	 font-size: 2.7em;
+	 
+	 -moz-border-radius: 9px;
+	 -webkit-border-radius: 9px;
+	 border-radius: 9px;
+	 
+	 transition: background-color .3s, opacity .5s, visibility .5s;
+}
+
+#elenco {
+	padding-top: 4%;	
+}
+
+#chiudi {
+    background: url(../img/chiudi.png) no-repeat top; /* 170px x 170px */
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    height: 50px;
+    width: 50px;
+	display: none;
+	z-index: 2;
+}
+
+video {
+	background-color: #000;
+	display: none;
+	/*display: block;*/
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	z-index: 1;
+}
+
+/* Landscape layout (with min-width) */
+@media screen and (min-aspect-ratio: 1/1) and (min-width:400px) {
+    .app {
+        background-position:left center;
+        padding:75px 0px 75px 170px;  /* padding-top + padding-bottom + text area = image height */
+        margin:-90px 0px 0px -198px;  /* offset vertical: half of image height */
+                                      /* offset horizontal: half of image width and text area width */
+    }
+}
+
+h1 {
+    font-size:24px;
+    font-weight:normal;
+    margin:0px;
+    overflow:visible;
+    padding:0px;
+    text-align:center;
+}
+
+.event {
+    border-radius:4px;
+    -webkit-border-radius:4px;
+    color:#FFFFFF;
+    font-size:12px;
+    margin:0px 30px;
+    padding:2px 0px;
+}
+
+.event.listening {
+    background-color:#333333;
+    display:block;
+}
+
+.event.received {
+    background-color:#4B946A;
+    display:none;
+}
+
+@keyframes fade {
+    from { opacity: 1.0; }
+    50% { opacity: 0.4; }
+    to { opacity: 1.0; }
+}
+ 
+@-webkit-keyframes fade {
+    from { opacity: 1.0; }
+    50% { opacity: 0.4; }
+    to { opacity: 1.0; }
+}
+ 
+.blink {
+    animation:fade 3000ms infinite;
+    -webkit-animation:fade 3000ms infinite;
+}

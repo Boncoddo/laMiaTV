@@ -1,0 +1,9 @@
+/node_modules
+/platforms/browser
+/platforms/sectv-orsay
+/platforms/sectv-tizen
+/platforms/tv-webos
+/plugins
+.jshintrc
+Gruntfile.js
+package-lock.json

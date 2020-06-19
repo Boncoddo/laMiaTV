@@ -1,0 +1,4 @@
+# Inserisci il link alla lista .M3U
+# Es. http://192.168.1.234:80/esempio.m3u
+
+http://www.pandasat.info/iptv/kodi

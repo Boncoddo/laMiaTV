@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+	<head>
+        <!--
+        Customize this policy to fit your own app's needs. For more guidance, see:
+            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+        Some notes:
+            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+                * Enable inline JS: add 'unsafe-inline' to default-src
+        -->
+        <!-- REMOVE meta tag for setting CSP(Content-Security-Policy)
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+        -->
+        <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+        <link rel="stylesheet" type="text/css" href="css/index.css">
+        <title>laMiaTV - versione 1.0</title>
+        
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+    </head>
+    <body>
+
+
+      	<!-- Tasto di chiusura -->
+
+    	<div id="chiudi" onClick="chiudi()">
+            
+        </div>
+
+        <!-- FINE Tasto di chiusura -->
+
+
+        <!-- Funzione di riavvio del player -->
+
+        <script type="text/javascript">
+        	function videoEnded(video) {
+				video.load();
+			}
+		</script>
+
+		<!-- FINE Funzione di riavvio del player -->
+
+
+        <!-- Player video -->
+
+    	<video id="video" width="100%" height="100%" src="" onEnded="videoEnded(this)" onError="videoEnded(this)" autoplay></video>
+
+    	<!-- FINE Player video -->
+
+
+		<!-- Javascript -->
+
+    	<script type="text/javascript">
+
+    		// Richesta HTTP
+
+	    	var xmlhttp = new XMLHttpRequest();  // Istanzia l'oggetto XMLHttpRequest per effettuare una richiesta HTTP
+	    	var url = "lista/link.txt"; // Imposta l'URL da richiedere
+	    	var metodo = "GET"; // Imposta il metodo da utilizzare per effettuare la richiesta (Es. GET, POST, DELETE, etc)
+	       
+			xmlhttp.open(metodo, url, true); // Apertura socket per la richiesta HTTP
+			xmlhttp.overrideMimeType("text/plain"); // Imposta il tipo di file da restituire
+			
+			// Esegui la funzione lettura quando i dati saranno recuperati dalla richiesta
+			xmlhttp.onreadystatechange = function() {
+				
+				if (this.readyState == 4 && this.status == 200) {
+					var coll = letturaTXT(this.responseText); // Carica il link relativo alla lista
+					
+					if (coll !== 0) {
+						// Richesta HTTP
+	
+		    			var xmlhttp = new XMLHttpRequest();  // Istanzia l'oggetto XMLHttpRequest per effettuare una richiesta HTTP
+				    	var url = coll; // Imposta l'URL da richiedere
+				    	var metodo = "GET"; // Imposta il metodo da utilizzare per effettuare la richiesta (Es. GET, POST, DELETE, etc)
+				       
+						xmlhttp.open(metodo, url, true); // Apertura socket per la richiesta HTTP
+						xmlhttp.overrideMimeType("text/plain"); // Imposta il tipo di file da restituire
+						xmlhttp.setRequestHeader("Cache-Control", "no-cache"); // Disattiva la memoria Cache
+						
+						// Esegui la funzione lettura quando i dati saranno recuperati dalla richiesta
+						xmlhttp.onreadystatechange = function() {
+				
+							if (this.readyState == 4 && this.status == 200) {
+								letturaM3U(this.responseText); // Carica la playlist .M3U
+								
+								if (valido === true) {
+									scritturaM3U(); // Scrive la playlist nella pagina
+								}
+							} else if (this.readyState == 4 && this.status == 0) {
+								// Mostra messaggio di errore
+								var caricamento = document.getElementById("caricamento");
+								caricamento.innerHTML = "";
+								caricamento.setAttribute('style', 'background-color: red;');
+								var txtRis = document.createTextNode("Errore nel caricamento.");
+								caricamento.appendChild(txtRis);
+							}
+						}
+						
+						xmlhttp.send(); // Invia la richiesta per leggere JSON da URL
+					}
+				}
+			}
+			
+			xmlhttp.send(); // Invia la richiesta per leggere JSON da URL
+
+			// FINE Richesta HTTP
+
+
+			// Lettura del file .TXT (che contiene il link alla lista)
+
+			function letturaTXT(testo) {
+				
+				// Crea un array dal file .TXT
+				var array = testo.split("\n").filter(function (valore) {
+					return (valore.trim().length === 0) ? false : true
+				});
+				
+				// Lettura di ciascuna riga del file .TXT
+				for (var i=0; i<array.length; i++) {
+					if (array[i].indexOf("#") != -1) { // Se la riga contiene un commento
+						// Ignora la riga
+					} else {
+						return array[i]; // Ritorna il link alla lista dei canali
+					}
+				}
+				
+				return 0;
+			}
+
+			// FINE Lettura del file .TXT (che contiene il link alla lista)
+
+
+			// Lettura M3U
+
+			function letturaM3U(testo) {
+				
+				// Dichiara gli array degli elementi
+				arrayTitolo = new Array();
+				arrayURI = new Array();
+				arraySezione = new Array();
+				arrayGruppo= new Array();
+				
+				valido = false; // Serve per la verifica della lista ricevuta
+				
+				// Crea un array dal file .M3U
+				var array = testo.split("\n").filter (function (valore) {
+					return (valore.trim().length === 0) ? false : true
+				});
+				
+				// Dichiarazione delle variabili
+				var sezione = null; // Inizializza la sezione
+				var gruppo = 0; // Inizializza il gruppo
+				var canale = true; // Inizializza variabile che controlla la validità del canale
+				
+				// Dichiarazione delle chiavi
+				var mapTitolo = null; // Inizializza la chiave titolo
+				var mapSezione = null; // Inizializza la chiave della sezione
+				var mapGruppo = null; // Inizializza la chiave del gruppo
+				var mapURI = null; // Inizializza la chiave dell'URI
+				
+				// Lettura di ciascuna riga del file .M3U
+				for (var i=0, k=0; i<array.length; i++) {
+					
+					if (array[i].indexOf("#") != -1) { // Se la riga contiene un commento o tag
+						if (array[i].indexOf("#EXTM3U") != -1) { // Se la riga è un tag EXTM3U...
+						
+							valido = true; // La lista è valida
+						} else if (array[i].indexOf("#EXTINF") != -1) { // Se la riga è un tag EXTINF...
+							
+							var pos = array[i].lastIndexOf(","); // Estrapola l'ultima virgola della riga
+							var senzaSpazi = array[i].substr(pos+1).trim(); // Elimina gli spazi dal testo
+							var regex = /^([^-=]*)?[-=]+.+[-=]+$/; // Espressione che verifica se si tratta di una sezione
+							
+							if (regex.test(senzaSpazi)) { // Si tratta di una sezione?
+								
+								sezione = array[i].substr(pos+1).replace(/[-=\s]+/g, " ").trim(); // Estrae il testo della sezione
+								sezione = sezione.replace(sezione.charAt(0), sezione.charAt(0).toUpperCase()); // Prima lettera in maiuscolo
+								gruppo += 1;
+								canale = false;
+							} else {
+							
+								mapTitolo = senzaSpazi; // Inserisce il titolo del canale nella relativa chiave
+										
+								if (sezione != null) {
+									 mapSezione = sezione;
+									 mapGruppo = gruppo;
+								}
+								
+								canale = true;
+							}
+						} else { // Se la riga contiene un commento
+							// Ignora la riga
+						}
+					} else { // Se la riga è un URI
+						if (canale) {
+							
+							mapURI = array[i].trim(); // Inserisce l'URI del canale nella relativa chiave
+							
+							if (mapTitolo != null) { // ... ed è presente un titolo
+								
+								arrayTitolo[k] = mapTitolo; // Copia il titolo nell'array
+								arraySezione[k] = (mapSezione != null) ? mapSezione : null; // Copia la sezione nell'array
+								arrayGruppo[k] = (mapGruppo != null) ? mapGruppo : null; // Copia il gruppo nell'array
+							} else { // ... se invece non è mai stato inserito un titolo
+								
+								arrayTitolo[k] = "Senza nome"; // Copia il titolo nell'array
+								arraySezione[k] = null; // Copia la sezione nell'array
+								arrayGruppo[k] = null; // Copia il gruppo nell'array
+							}
+							
+							arrayURI[k] = mapURI; // Copia l'URI nell'array
+							k++;
+						}
+					}
+				}
+			}
+
+			// FINE Lettura M3U
+
+
+			// Barra di avanzamento
+			
+			var stoCaricando = 0;
+			
+			function attesa(indice) {
+				
+				if (indice == 0) {
+					
+					// Segna che il caricamento è in corso...
+					stoCaricando = 1;
+					
+					// Seleziona e disabilita la barra di ricerca
+					var ricerca = document.getElementById("barra");
+					ricerca.disabled = "true";
+					
+					// Seleziona e imposta l'avanzamento
+					var avanzamento = document.getElementById("avanzamento");
+					avanzamento.setAttribute('style', 'padding-top: 4%;');
+					
+					if (!document.getElementById("caricamento")) {
+						// Crea TAG del "Caricamento in corso..."
+						var caricamento = document.createElement("div");
+						caricamento.setAttribute('id', 'caricamento');
+						caricamento.setAttribute('class', 'sezione');
+						
+						// Inserisce TAG nell'avanzamento
+						avanzamento.appendChild(caricamento);
+					}
+				}
+					
+				// Seleziona TAG del "Caricamento in corso..."
+				var caricamento = document.getElementById("caricamento");
+				
+				// Cancella il testo dal TAG del "Caricamento in corso..."
+				caricamento.innerHTML = "";
+				
+				// Inserisce testo e percentuale di avanzamento nel TAG
+				var percentuale = indice / (arrayTitolo.length / 100);
+				var txtRis = document.createTextNode("Caricamento in corso... "+Math.ceil(percentuale)+"%");
+				caricamento.appendChild(txtRis);
+				
+				if (Math.ceil(percentuale) >= 10) {
+					// Visualizza l'elenco dei canali
+					document.getElementById("elenco").setAttribute('style', 'display: block;');
+				} else {
+					// Nascondi l'elenco dei canali
+					document.getElementById("elenco").setAttribute('style', 'display: none;');
+				}
+			}
+			
+			// FINE Barra di avanzamento
+
+
+			// Scrittura M3U
+			
+			var i = 0;
+			var sezCorr = null; // Sezione corrente
+			var sezPrec = null; // Sezione precedente
+			
+			function scritturaM3U() {				
+				
+				if (i<arrayTitolo.length) { // Scorrimento della playlist...
+				
+					attesa(i); // Aggiorna la barra di caricamento
+					
+					var canali = document.getElementById("elenco"); // Preleva il tag dell'elenco canali
+					sezCorr = arraySezione[i]; // Segna la sezione corrente
+					
+					if (sezCorr == null) { // Se la sezione non è stata ancora impostata...
+					
+						// Dichiarazione del collegamento ipertestuale
+						var collegamento = document.createElement("a");
+						collegamento.setAttribute('onClick', "javascript: mostraVideo (\"" + arrayURI[i] + "\");");
+						
+						// Crea TAG del canale
+						var canale = document.createElement("div");
+						canale.setAttribute('class', 'canale');
+						canale.setAttribute('style', 'display: block;');
+						
+						// Inserisce elemento decorativo
+						var freccia = document.createElement("span");
+						freccia.setAttribute('class', 'icona');
+						freccia.innerHTML = "&nbsp;";
+						canale.appendChild(freccia);
+						
+						// Inserisce il titolo del canale
+						var txtRis = document.createTextNode(arrayTitolo[i]);
+						canale.appendChild(txtRis);
+						
+						// Aggiunge il canale
+						collegamento.appendChild(canale)
+						canali.appendChild(collegamento);
+					} else { // ... altrimenti
+						
+						if (sezPrec != sezCorr) { // Se la sezione corrente è diversa dalla precedente...
+							
+							sezPrec = arraySezione[i]; // Segna sezione precedente
+							
+							// Crea link per aprire la sezione
+							var collegamento = document.createElement("a");
+							collegamento.setAttribute('onClick', "javascript: apriSezione (" + arrayGruppo[i] + ");");
+							
+							// Crea TAG della sezione
+							var sezione = document.createElement("div");
+							sezione.setAttribute('id', arrayGruppo[i]);
+							
+							var esisteCSS = document.getElementById("gruppo" + arrayGruppo[i]) ? true : false; // Verifica se esiste l'elemento di stile
+							if (esisteCSS) { // Se esiste...
+								var testoCSS = document.getElementById("gruppo" + arrayGruppo[i]).innerHTML; // Preleva il testo dal tag di stile
+								
+								if (testoCSS.indexOf(".gruppo" + arrayGruppo[i] + " { display: block; !important}") == -1) { // Se display è impostato a none
+									sezione.setAttribute('visualizzato', "false");
+								} else { // Altrimenti...
+									sezione.setAttribute('visualizzato', "true");
+								}
+							} else { // Se non esiste...
+								sezione.setAttribute('visualizzato', "false");
+							}
+							
+							sezione.setAttribute('class', 'sezione');
+							
+							// Inserisce il testo
+							var txtRis = document.createTextNode(arraySezione[i]);
+							sezione.appendChild(txtRis);
+							
+							// Aggiunge la sezione
+							collegamento.appendChild(sezione);
+							canali.appendChild(collegamento);
+						}
+						
+						// Dichiarazione del collegamento ipertestuale
+						var collegamento = document.createElement("a");
+						collegamento.setAttribute('onClick', "javascript: mostraVideo (\"" + arrayURI[i] + "\");");
+						
+						// Crea TAG del canale
+						var canale = document.createElement("div");
+						canale.setAttribute('class', 'canale gruppo'+arrayGruppo[i]);
+						
+						// Inserisce elemento decorativo
+						var freccia = document.createElement("span");
+						freccia.setAttribute('class', 'icona');
+						freccia.innerHTML = "&nbsp;";
+						canale.appendChild(freccia);
+						
+						// Inserisce il titolo del canale
+						var txtRis = document.createTextNode(arrayTitolo[i]);
+						canale.appendChild(txtRis);
+						
+						// Aggiunge il canale
+						collegamento.appendChild(canale)
+						canali.appendChild(collegamento);
+					}
+					
+					i++;
+					setTimeout(scritturaM3U, 0);
+				} else {
+					
+					// Cancella avanzamento
+					document.getElementById("avanzamento").innerHTML = "";
+					document.getElementById("avanzamento").setAttribute('style', 'padding-top: 0%;');
+					
+					// Reimposta le variabili
+					i = 0;
+					sezCorr = null; // Sezione corrente
+					sezPrec = null; // Sezione precedente
+					
+					// Abilita la barra di ricerca
+					var ricerca = document.getElementById("barra");
+					ricerca.removeAttribute("disabled");
+					
+					// Se provieni da una ricerca e durante il caricamento non hai aperto nulla...
+					if (typeof posizioneCorrente !== 'undefined' && stoCaricando == 1) {
+						window.scrollTo(0,posizioneCorrente); // Scorri nella posizone antecedente alla ricerca
+					}
+					
+					// Segna che il caricamento è finito...
+					stoCaricando = 0;
+				}
+				
+				// canaliHTML = document.getElementById("elenco").innerHTML;
+				
+			}
+
+			// FINE Scrittura M3U
+
+
+			// Aprire e chiudere una lista
+
+			function apriSezione(sezione) {
+				
+				// Se apri/chiudi una sezione mentre sta caricando
+				if (stoCaricando == 1) {
+					stoCaricando = 0; // Segna come se il caricamento fosse completo (serve per evitare lo scorrimento)
+				}
+			
+				var visualizzato = document.getElementById(sezione).getAttribute("visualizzato").indexOf("true") == -1 ? false : true; // Imposta lo stato della sezione
+				
+				if (!visualizzato) { // Se non è visualizzata...
+					
+					var id = document.getElementById("gruppo" + sezione) ? false : true; // Verifica se esiste l'elemento di stile
+					
+					if (id) {
+						
+						// Inserisce l'elemento di stile e visualizza la lista
+						var style = document.createElement('style');
+						style.setAttribute("id", "gruppo" + sezione);
+						style.innerHTML = ".gruppo" + sezione + " { display: block; !important} ";
+						document.head.appendChild(style);
+					} else {
+						
+						// Modifica l'elemento di stile e visualizza la lista
+						var style = document.getElementById('gruppo' + sezione);
+						style.innerHTML = ".gruppo" + sezione + " { display: block; !important} ";
+					}
+					
+					// Segna la lista come aperta
+					document.getElementById(sezione).setAttribute("visualizzato", "true");
+				} else {
+					
+					// Modifica l'elemento di stile e chiude la lista
+					var style = document.getElementById('gruppo' + sezione);
+					style.innerHTML = " ";
+					
+					// Segna la lista come chiusa
+					document.getElementById(sezione).setAttribute("visualizzato", "false");
+				}
+				
+				// canaliHTML = document.getElementById("elenco").innerHTML;
+			}
+
+			// FINE Aprire e chiudere una lista
+
+
+			// Ricerca di un canale
+
+			function ricerca() {
+				
+				if (valido === true) {
+				
+					var ricerca = document.getElementById("barra").value.toLowerCase(); // Preleva il testo da cercare tutto in minuscolo
+					var pulsanteCerca = document.getElementById('pulsanteCerca'); // Seleziona il pulsante di ricerca
+					var pulsanteChiudi = document.getElementById('pulsanteChiudi'); // Seleziona il pulsante di chiusura
+					
+					if ((ricerca.indexOf("cerca...") === 0 && ricerca.trim().length === 8) || !ricerca) {
+						
+						// Ignora l'azione dell'utente
+					} else {
+						
+						posizioneCorrente = (document.documentElement.scrollTop) ? document.documentElement.scrollTop : document.body.scrollTop; // Salva la posizione corrente
+						window.scrollTo(0,0); // Vai nel top pagina
+						document.getElementById("elenco").innerHTML = ""; // Svuota l'elenco dei canali
+						
+						for (var i=0; i<arrayTitolo.length; i++) { // Scorrimento della playlist...
+							
+							if (!arrayTitolo[i].toLowerCase().indexOf(ricerca)) {
+								
+								var canali = document.getElementById("elenco"); // Preleva il tag dell'elenco canali
+								
+								// Dichiarazione del collegamento ipertestuale
+								var collegamento = document.createElement("a");
+								collegamento.setAttribute('onClick', "javascript: mostraVideo (\"" + arrayURI[i] + "\");");
+								
+								// Crea TAG del canale
+								var canale = document.createElement("div");
+								canale.setAttribute('class', 'canale');
+								canale.setAttribute('style', 'display: block;');
+								
+								// Inserisce elemento decorativo
+								var freccia = document.createElement("span");
+								freccia.setAttribute('class', 'icona');
+								freccia.innerHTML = "&nbsp;";
+								canale.appendChild(freccia);
+								
+								// Inserisce il titolo del canale
+								var txtRis = document.createTextNode(arrayTitolo[i]);
+								canale.appendChild(txtRis);
+								
+								// Aggiunge il canale
+								collegamento.appendChild(canale);
+								canali.appendChild(collegamento);
+							}
+						}
+						
+						if (pulsanteCerca && pulsanteChiudi) {
+							pulsanteCerca.setAttribute('style', "display: none;"); // Nasconde il pulsante di ricerca
+							pulsanteChiudi.setAttribute('style', "display: block;"); // Mostra il pulsante di chiusura
+							
+							var ricerca = document.getElementById("barra"); // Seleziona la barra di ricerca
+							ricerca.disabled = "true"; // Disabilita la barra
+						}
+					}
+				}
+			}
+
+			// FINE Ricerca di un canale
+
+
+			// Reset della barra di ricerca
+
+			function svuota() {
+				
+				var ricerca = document.getElementById("barra"); // Seleziona la barra di ricerca
+				
+				if (ricerca) {
+					ricerca.value = "Cerca..."; // Ripristina il testo della barra
+					ricerca.removeAttribute("disabled"); // Abilita la barra
+				}
+				
+				var elenco = document.getElementById("elenco"); // Seleziona l'elenco dei canali
+				
+				if (elenco) {
+					document.getElementById("elenco").innerHTML = ""; // Svuota l'elenco dei canali
+					scritturaM3U(); // Scrive la playlist nella pagina
+					// document.getElementById("elenco").innerHTML = canaliHTML; // Ripristina l'elenco dei canali
+				}
+
+				var pulsanteCerca = document.getElementById('pulsanteCerca'); // Seleziona il pulsante di ricerca
+				var pulsanteChiudi = document.getElementById('pulsanteChiudi'); // Seleziona il pulsante di chiusura
+				
+				if (pulsanteCerca && pulsanteChiudi) {
+					pulsanteCerca.setAttribute('style', "display: block;"); // Mostra il pulsante di ricerca
+					pulsanteChiudi.setAttribute('style', "display: none;"); // Nasconde il pulsante di chiusura
+				}
+			}
+
+			// FINE Reset della barra di ricerca
+
+
+			// Pulisce la barra di ricerca
+
+			function pulisci() {
+				
+				var ricerca = document.getElementById("barra"); // Seleziona la barra di ricerca
+				ricerca.value = ""; // Ripristina il testo della barra
+			}
+
+			// FINE Pulisce la barra di ricerca
+
+
+			// Mostra il player video
+
+			function mostraVideo(url) {
+				var video = document.getElementById('video'); // Seleziona il video
+				video.setAttribute('style', "display: block;"); // Mostra il lettore
+				video.setAttribute('src', url); // Imposta URL
+				
+				// var chiudi = document.getElementById('chiudi'); // Seleziona il tasto chiudi
+				// chiudi.setAttribute('style', "display: block;"); // Mostra il tasto
+				
+				// Registra il tasto rosso
+				toast.inputdevice.registerKey("ColorF0Red", function () { }, function(err) {
+				    console.log("Errore : " + err.message);
+				});
+				// Registra il tasto indietro
+				toast.inputdevice.registerKey("Return", function () { }, function(err) {
+				    console.log("Errore : " + err.message);
+				});
+				// Registra il tasto stop
+				toast.inputdevice.registerKey("MediaStop", function () { }, function(err) {
+				    console.log("Errore : " + err.message);
+				});
+				// Registra il tasto scorri indietro
+				toast.inputdevice.registerKey("MediaRewind", function () { }, function(err) {
+				    console.log("Errore : " + err.message);
+				});
+				// Registra il tasto play
+				toast.inputdevice.registerKey("MediaPlay", function () { }, function(err) {
+				    console.log("Errore : " + err.message);
+				});
+				// Registra il tasto play/pausa
+				toast.inputdevice.registerKey("MediaPlayPause", function () { }, function(err) {
+				    console.log("Errore : " + err.message);
+				});
+				// Registra il tasto pausa
+				toast.inputdevice.registerKey("MediaPause", function () { }, function(err) {
+				    console.log("Errore : " + err.message);
+				});
+				// Registra il tasto scorri avanti
+				toast.inputdevice.registerKey("MediaFastForward", function () { }, function(err) {
+				    console.log("Errore : " + err.message);
+				});
+				
+				// Recupera le informazioni del tasto rosso
+				var rosso = 0;
+				toast.inputdevice.getKey("ColorF0Red", function (key) {
+				   this.rosso = key.code;
+				}, function(err){
+				    console.log("Errore : " + err.message);
+				});
+				// Recupera le informazioni del tasto indietro
+				var indietro = 0;
+				toast.inputdevice.getKey("Return", function (key) {
+				   this.indietro = key.code;
+				}, function(err){
+				    console.log("Errore : " + err.message);
+				});
+				// Recupera le informazioni del tasto stop
+				var stop = 0;
+				toast.inputdevice.getKey("MediaStop", function (key) {
+				   this.stop = key.code;
+				}, function(err){
+				    console.log("Errore : " + err.message);
+				});
+				// Recupera le informazioni del tasto scorri indietro
+				var scorriIndietro = 0;
+				toast.inputdevice.getKey("MediaRewind", function (key) {
+				   this.scorriIndietro = key.code;
+				}, function(err){
+				    console.log("Errore : " + err.message);
+				});
+				// Recupera le informazioni del tasto play
+				var play = 0;
+				toast.inputdevice.getKey("MediaPlay", function (key) {
+				   this.play = key.code;
+				}, function(err){
+				    console.log("Errore : " + err.message);
+				});
+				// Recupera le informazioni del tasto play/pausa
+				var playPausa = 0;
+				toast.inputdevice.getKey("MediaPlayPause", function (key) {
+				   this.playPausa = key.code;
+				}, function(err){
+				    console.log("Errore : " + err.message);
+				});
+				// Recupera le informazioni del tasto pausa
+				var pausa = 0;
+				toast.inputdevice.getKey("MediaPause", function (key) {
+				   this.pausa = key.code;
+				}, function(err){
+				    console.log("Errore : " + err.message);
+				});
+				// Recupera le informazioni del tasto scorri avanti
+				var scorriAvanti = 0;
+				toast.inputdevice.getKey("MediaFastForward", function (key) {
+				   this.scorriAvanti = key.code;
+				}, function(err){
+				    console.log("Errore : " + err.message);
+				});
+				
+				// Imposta gli eventi alla pressione dei tasti
+				var interruttore = true; // Serve al pulsante play/pausa (è inizializzato a true poiché è attivo l'autoplay)
+				var indiceAudio = 1; // Indice per che serve a cambiare le tracce audio
+				
+				window.addEventListener("keydown", function(keyEvent) {
+					var tempo = 300; // 5 minuti (che equivalgono a 300 secondi)
+					
+					if (keyEvent.keyCode === this.rosso) {
+				        if (this.indiceAudio < this.video.audioTracks.length) { // Cambia la traccia audio
+				            this.video.audioTracks[this.indiceAudio-1].enabled = false;
+				        	this.video.audioTracks[this.indiceAudio].enabled = true;
+				        	this.indiceAudio++;
+				        } else { // Reimposta la traccia audio predefinita
+							this.video.audioTracks[this.indiceAudio-1].enabled = false;
+							this.video.audioTracks[0].enabled = true;
+							this.indiceAudio = 1;
+						}
+				    }
+					if (keyEvent.keyCode === this.indietro || keyEvent.keyCode === this.stop) {
+				        this.chiudi(); // Chiude il player
+				    }
+				    if (keyEvent.keyCode === this.scorriIndietro) {
+				        this.video.currentTime = this.video.currentTime - tempo; // Porta il player indietro
+				    }
+				    if (keyEvent.keyCode === this.play) {
+				        this.video.play(); // Mette in riproduzione il player
+				    }
+				    if (keyEvent.keyCode === this.playPausa) {
+				        if (interruttore) {
+				            this.video.pause(); // Mette in pausa il player
+				        } else {
+				        	this.video.play(); // Mette in riproduzione il player
+				        }
+				        interruttore = !interruttore;
+				    }
+				    if (keyEvent.keyCode === this.pausa) {
+				        this.video.pause(); // Mette in pausa il player
+				    }
+				    if (keyEvent.keyCode === this.scorriAvanti) {
+				        this.video.currentTime = this.video.currentTime + tempo; // Porta il player avanti
+				    }
+			    });
+			}
+
+			// FINE Mostra il player video
+
+
+			// Azione del pulsante chiudi del player
+
+			function chiudi() {
+				var video = document.getElementById('video'); // Seleziona il video
+				video.setAttribute('style', "display: none;"); // Nascondi il lettore
+				video.setAttribute('src', ""); // Imposta URL
+				
+				// var chiudi = document.getElementById('chiudi'); // Seleziona il tasto chiudi
+				// chiudi.setAttribute('style', "display: none;"); // Nascondi il tasto
+				
+				// Cancella il tasto rosso
+				toast.inputdevice.unregisterKey("ColorF0Red", function() { }, function(err) {
+				    console.log('Errore: ' + err.message);
+				});
+				// Cancella il tasto indietro
+				toast.inputdevice.unregisterKey("Return", function() { }, function(err) {
+				    console.log('Errore: ' + err.message);
+				});
+				// Cancella il tasto stop
+				toast.inputdevice.unregisterKey("MediaStop", function() { }, function(err) {
+				    console.log('Errore: ' + err.message);
+				});
+				// Cancella il tasto scorri indietro
+				toast.inputdevice.unregisterKey("MediaRewind", function() { }, function(err) {
+				    console.log('Errore: ' + err.message);
+				});
+				// Cancella il tasto play
+				toast.inputdevice.unregisterKey("MediaPlay", function() { }, function(err) {
+				    console.log('Errore: ' + err.message);
+				});
+				// Cancella il tasto play/pausa
+				toast.inputdevice.unregisterKey("MediaPlayPause", function() { }, function(err) {
+				    console.log('Errore: ' + err.message);
+				});
+				// Cancella il tasto pausa
+				toast.inputdevice.unregisterKey("MediaPause", function() { }, function(err) {
+				    console.log('Errore: ' + err.message);
+				});
+				// Cancella il tasto scorri avanti
+				toast.inputdevice.unregisterKey("MediaFastForward", function() { }, function(err) {
+				    console.log('Errore: ' + err.message);
+				});
+				
+				// Cancella gli eventi relativi alla pressione dei tasti
+				window.removeEventListener("keydown");
+			}
+
+			// FINE Azione del pulsante chiudi del player
+
+
+			// Funzione che permette di andare al top della pagina
+
+			function topPagina() {
+				window.scrollTo(0,0); // Vai nel top della pagina
+			}
+
+			// FINE Funzione che permette di andare al top della pagina
+
+
+			// Funzione che permette di far apparire/scomparire il bottone per andare al top della pagina
+
+			window.onscroll = function() {
+				var bottone = document.getElementById('pulsanteTop'); // Seleziona il bottone
+				
+				if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) { // Scorrimento in basso...
+				    bottone.style.visibility = "visible"; // Mostra il bottone
+				    bottone.style.opacity = "1"; // Nessuna trasparenza
+				} else { // Ritorna in alto...
+				    bottone.style.visibility = "hidden"; // Nascondi il bottone
+				    bottone.style.opacity = "0"; // Trasparenza massima
+				}
+			};
+
+			// FINE Funzione che permette di far apparire/scomparire il bottone per andare al top della pagina
+
+  		</script>
+
+  		<!-- FINE Javascript -->
+
+
+        <!-- Barra di ricerca -->
+
+		<div class="ancorato">
+        	<table>
+				<tr>
+					<td>
+						<input id="barra" type="text" onFocus="pulisci();" value="Cerca..." size="20" maxlength="20" disabled="disabled"/>
+					</td>
+					<td>
+		            	<button id="pulsanteCerca" onClick="ricerca();"><i class="fas fa-search"></i></button>
+			            <button id="pulsanteChiudi" onClick="svuota();"><i class="far fa-window-close"></i></button>
+		            </td>
+		    	</tr>
+	        </table>
+		</div>
+
+		<!-- FINE Barra di ricerca -->
+
+
+		<br><br><br><br>
+
+
+		<!-- Bottone per andare nel top della pagina -->
+		
+		<button id="pulsanteTop" onClick="topPagina();"><i class="fas fa-arrow-up"></i></button>
+		
+		<!-- FINE Bottone per andare nel top della pagina -->
+
+
+        <!-- Lista dei canali -->
+
+        <div id="avanzamento" style="padding-top: 4%;">
+        	<div id="caricamento" class="sezione">
+        		Caricamento in corso...
+        	</div>
+        </div>
+
+        <div id="elenco">
+        	
+        </div>
+
+        <!-- FINE Lista dei canali -->
+
+
+        <!-- Javascript -->
+
+        <script type="text/javascript" src="cordova.js"></script>
+        
+        <!-- Add toast.js to use toast api -->
+        <script type="text/javascript" src="toast.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+
+        <!-- FINE Javascript -->
+
+
+    </body>
+</html>
